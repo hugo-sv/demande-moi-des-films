@@ -56,18 +56,43 @@ class Recommendation:
 
     # Display the recommendation for a user
     def make_recommendation(self, user):
-        movie = choice(list(self.movies.values())).title
 
-        return "Vos recommandations : " + ", ".join([movie])
+        scores = self.compute_all_similarities(user)
+        max_sim=None
+        max_user=None
+        for user in scores.keys():
+            if max_sim==None or scores[user]>max_sim:
+                max_sim=scores[user]
+                max_user=user
+
+
+        # movie = choice(list(self.movies.values())).title
+
+        return "Vos recommandations : " + ", ".join(movie.title for movie in max_user.good_ratings)+ "  -  " + str(max_user.id) + "  -  " + str(max_sim)
 
     # Compute the similarity between two users
     @staticmethod
     def get_similarity(user_a, user_b):
-        return 1
+        S=0
+        for film in user_a.good_ratings:
+            if film in user_b.good_ratings:
+                S+=1
+            if film in user_b.bad_ratings:
+                S+=-1
+        for film in user_a.bad_ratings:
+            if film in user_b.good_ratings:
+                S+=-1
+            if film in user_b.bad_ratings:
+                S+=1
+        return S
 
     # Compute the similarity between a user and all the users in the data set
     def compute_all_similarities(self, user):
-        return []
+        result={}
+        for key in self.test_users.keys():
+            if (self.test_users[key].id!=user.id):
+                result[self.test_users[key]]=self.get_similarity(self.test_users[key],user)
+        return result
 
     @staticmethod
     def get_best_movies_from_users(users):
