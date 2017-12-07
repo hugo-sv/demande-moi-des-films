@@ -5,7 +5,7 @@
 from random import choice
 
 from app.User import User
-
+import operator
 
 class Recommendation:
 
@@ -58,18 +58,17 @@ class Recommendation:
     def make_recommendation(self, user):
 
         scores = self.compute_all_similarities(user)
-        max_sim=None
-        max_user=None
-        for user in scores.keys():
-            if max_sim==None or scores[user]>max_sim:
-                max_sim=scores[user]
-                max_user=user
 
+        best_scores = sorted(scores.items(), key=operator.itemgetter(1))[-5:]
 
-        # movie = choice(list(self.movies.values())).title
+        movies=[]
 
-        return "Vos recommandations : " + ", ".join(movie.title for movie in max_user.good_ratings)+ "  -  " + str(max_user.id) + "  -  " + str(max_sim)
+        for movie in best_scores[-1]:
+            doubles=list(((movie in combination[0].good_ratings) for combination in best_scores[:-1]))
+            if doubles[0] and doubles[1] and doubles[2] and doubles[3] :
+                movies.append(movie)
 
+        return "Vos recommandations : " + ", ".join(movie.title for movie in movies)
     # Compute the similarity between two users
     @staticmethod
     def get_similarity(user_a, user_b):
